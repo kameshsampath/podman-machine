@@ -133,7 +133,7 @@ That should show an output:
 
 [TIP]
 ====
- - As a convinience you can add port forwards to Vagrantfile, allowing you to access the services from using `localhost`
+ - As a convenience you can add port forwards to Vagrantfile, allowing you to access the services from using `localhost`
  - Alias docker to podman `alias docker=podman`
 ====
 
