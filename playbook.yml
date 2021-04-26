@@ -14,7 +14,7 @@
         device: "{{ podman_storage_device }}"
         number: 1
         state: present
-        fs_type: btrfs
+        fs_type: ext4
         unit: GiB
     
     - name: "Read device '{{ podman_storage_device }}' info"
