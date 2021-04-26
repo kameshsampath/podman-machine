@@ -1,2 +1,8 @@
 .venv
+.vagrantlog
 .vagrant
+log
+*.log
+.project
+.classpath
+.settings

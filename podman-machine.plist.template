@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Disabled</key>
+	<false/>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+    <!-- Added the needed paths that need to be visible to the service-->
+    <!-- At minimum Vbox path -->
+		<string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin</string>
+		<key>VAGRANT_DEFAULT_PROVIDER</key>
+		<string>virtualbox</string>
+		<key>VAGRANT_EXPERIMENTAL</key>
+		<string>1</string>
+	</dict>
+	<key>Label</key>
+	<string>dev.kameshs.podmachine</string>
+	<key>Program</key>
+	<string>/usr/local/bin/vagrant</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string></string>
+		<string>up</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StandardErrorPath</key>
+  <!-- Update this to match your path-->
+	<string>/tmp/podman-machine-stdout.log</string>
+	<key>StandardOutPath</key>
+  <!-- Update this to match your path-->
+	<string>/tmp/podman-machine-stderr.log</string>
+	<key>WorkingDirectory</key>
+  <!-- Update this to match your directory where you cloned the podman-machine GitHub repo -->
+  <string>~/podman-machine</string>
+</dict>
+</plist>
