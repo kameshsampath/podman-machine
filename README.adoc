@@ -1,22 +1,24 @@
-= Podman macOS
+= podman-machine for macOS or Windows
 :experimental:
 
 A small utility to have https://podman.io[podman] installed and configured. The remote server will be configured using https://www.vagrantup.com/[Vagrant] + https://www.virtualbox.org/[Virtualbox] provider.
 
 == Pre-requisite 
 
-- Python >= 3.6 `brew install python`
-- https://www.vagrantup.com/[Vagrant]
-- https://podman.io[podman]
-- https://www.virtualbox.org/[Virtualbox]
+* Python >= 3.8 
+  ** macOS --> `brew install python` 
+  ** Windows --> https://docs.conda.io/en/latest/miniconda.html
+* https://www.vagrantup.com/[Vagrant]
+* https://podman.io[podman]
+* https://www.virtualbox.org/[Virtualbox]
 
 [IMPORTANT]
 ====
 Tested with:
 
-- Virtualbox `Version 6.1.18 r142142 (Qt5.6.3)`
-- podman `v3.1.2`
-- vagrant `v2.2.15`
+* Virtualbox `Version 6.1.18 r142142 (Qt5.6.3)`
+* podman `v3.1.2`
+* vagrant `v2.2.15`
 ====
 
 == Setup
@@ -31,12 +33,18 @@ export VAGRANT_DEFAULT_PROVIDER="virtualbox"#<.>
 <.> Provision extra disks to add separate storage for podman. Please check the https://www.vagrantup.com/docs/disks/usage[documentation] for more info.
 <.> Use Virtualbox as the default provider
 
-=== Install podman on macOS
+=== Install podman 
 
+==== On macOS
 [source,bash]
 ----
 brew install podman
 ----
+
+==== On Windows
+https://github.com/containers/podman/releases/latest/download/podman-remote-release-windows.zip[Download]
+
+[NOTE]: For Windows users its highly recommended to use WSL
 
 === Ansible Setup on macOS
 
