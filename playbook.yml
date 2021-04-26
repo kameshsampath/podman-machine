@@ -1,0 +1,145 @@
+- hosts: all
+  collections:
+    - ansible.posix
+    - community.crypto
+    - community.general
+  
+  vars:
+    podman_storage_device: /dev/sdb
+
+  tasks:
+    - name: "Create partition for podman container storage"
+      become: yes
+      community.general.parted:
+        device: "{{ podman_storage_device }}"
+        number: 1
+        state: present
+        fs_type: btrfs
+        unit: GiB
+    
+    - name: "Read device '{{ podman_storage_device }}' info"
+      become: yes
+      community.general.parted:
+        device: "{{ podman_storage_device }}"
+        number: 1
+        state: info
+        fs_type: ext4
+        unit: GiB
+      register: sdb_info
+
+    - name: "Set mount source"
+      set_fact: 
+        mount_src: "{{ sdb_info | json_query('disk.dev') + sdb_info | json_query('partitions[0].num') | string  }}"
+
+    - name: "Mount '/home/vagrant/.local/share/containers' on to '{{ podman_storage_device }}'"
+      become: yes
+      ansible.posix.mount:
+        path: "{{ ansible_env.HOME }}/.local/share/containers"
+        src: "{{ mount_src }}"
+        fstype: ext4
+        state: present
+      register: mount_out
+
+    - name: "Upgrade all packages"
+      become: yes
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+
+    - name: "Install some essentials"
+      become: yes
+      ansible.builtin.dnf:
+        name:
+          - wget
+          - git
+          - podman
+        state: latest
+
+    - name: "Ensure sshd is enabled and started"
+      become: yes
+      ansible.builtin.service:
+        name: sshd
+        enabled: true
+        state: started
+
+    - name: "Enable podman socket for current user"
+      ansible.builtin.systemd:
+        state: restarted
+        enabled: true
+        scope: user
+        name: podman.socket
+
+    - name: "Enable linger for vagrant user"
+      become: yes
+      ansible.builtin.command:
+        argv:
+          - loginctl 
+          - enable-linger
+          - $USER
+
+    - name: "Start podman REST API"
+      ansible.builtin.command:
+        argv:
+          - podman 
+          - system
+          - service
+          - -t
+          - 0
+      async: 1000
+      poll: 0
+      register: rest_api_log
+    
+    - name: "Generate podman client cert"
+      local_action:
+        module: community.crypto.openssh_keypair
+        path: "{{ lookup('env','HOME') }}/.ssh/podman_id_rsa"
+        mode: "0700"
+      run_once: true
+    
+    - name: "Copy podman public key to vagrant host"
+      ansible.posix.authorized_key:
+        user: "{{ ansible_user }}"
+        state: present
+        key: "{{ lookup('file', lookup('env','HOME')+'/.ssh/podman_id_rsa.pub') }}"
+  
+    - name: "Add podman connection"
+      local_action:
+        module: ansible.builtin.command
+        argv:
+          - podman 
+          - system
+          - connection
+          - add
+          - "--default"
+          - --identity
+          - "{{ lookup('env','HOME') }}/.ssh/podman_id_rsa"
+          - --port
+          - "{{ ansible_port | default(2222) }}"
+          - "{{ 'vagrant-' + ansible_host }}"
+          - "{{ ansible_user | default('vagrant') }}@localhost"
+      run_once: true
+    
+    - name: "Create Registry Configuration Directory"
+      ansible.builtin.file:
+        state: directory
+        path: "{{ ansible_env.HOME }}/.config/containers"
+
+    - name: "Add registry configuration"
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/etc/registries.conf"
+        dest: "{{ ansible_env.HOME }}/.config/containers"
+        owner: "{{ ansible_user | default('vagrant') }}"
+        group: "{{ ansible_user | default('vagrant') }}"
+        mode: '0644'
+
+    - name: "Read podman info"
+      local_action:
+        module: ansible.builtin.command
+        argv:
+          - podman 
+          - info
+      register: podman_info
+    
+    - name: "Show podman info"
+      debug:
+        msg: "{{ podman_info.stdout }}"

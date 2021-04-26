@@ -1,0 +1,148 @@
+= Podman macOS
+:experimental:
+
+A small utility to have https://podman.io[podman] installed and configured. The remote server will be configured using https://www.vagrantup.com/[Vagrant] + https://www.virtualbox.org/[Virtualbox] provider.
+
+== Pre-requisite 
+
+- Python >= 3.6 `brew install python`
+- https://www.vagrantup.com/[Vagrant]
+- https://podman.io[podman]
+- https://www.virtualbox.org/[Virtualbox]
+
+[IMPORTANT]
+====
+Tested with:
+- Virtualbox `Version 6.1.18 r142142 (Qt5.6.3)`
+- podman `v3.1.2`
+- vagrant `v2.2.15`
+====
+
+== Setup
+
+=== Environment Variables
+
+[source,bash]
+----
+export VAGRANT_EXPERIMENTAL="1"#<.>
+export VAGRANT_DEFAULT_PROVIDER="virtualbox"#<.>
+----
+<.> Provision extra disks to add separate storage for podman. Please check the https://www.vagrantup.com/docs/disks/usage[documentation] for more info.
+<.> Use Virtualbox as the default provider
+
+=== Install podman on macOS
+
+[source,bash]
+----
+brew install podman
+----
+
+=== Ansible Setup on macOS
+
+Install https://python-poetry.org/[poetry]:
+
+[source,bash]
+----
+curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+----
+
+[source,bash]
+----
+poetry env use python#<.>
+poetry install#<.>
+----
+<.> Use the python virtual environment with all needed dependencies
+<.> Ansible and other dependencies
+
+Install Ansible collections that are used during provisioning:
+
+[source,bash]
+----
+ansible-galaxy collection install -r requirements.yml
+----
+
+=== Install and Provision Vagrant Box (podman-machine)
+
+[source,bash]
+----
+vagrant up
+----
+
+[NOTE,caption="Optional"]
+====
+[source,bash]
+----
+vagrant plugin install vagrant-vbguest
+----
+====
+
+NOTE: Wait for few minutes for the installation to be done.
+
+== Verify Setup
+
+Search for `httpd` image
+
+[source,bash]
+----
+podman search httpd --filter="is-official" --format="table {{.Index}} {{.Name}}"
+----
+
+Copy the name and run the container:
+
+[source,bash]
+----
+podman run -it -p 8080:80/tcp docker.io/library/httpd
+----
+
+Check the running container
+
+[source,bash]
+----
+podman ps
+----
+
+Should output something like:
+
+[source,bash]
+----
+CONTAINER ID  IMAGE                           COMMAND           CREATED         STATUS             PORTS                 NAMES
+03ea95970a7a  docker.io/library/httpd:latest  httpd-foreground  10 seconds ago  Up 11 seconds ago  0.0.0.0:8080->80/tcp  sharp_zhukovsky
+----
+
+All the services will be mapped to Vagrant Host IP, default it is set to `192.168.33.10`, hence to access the container do 
+
+[source,bash]
+----
+curl 192.168.33.10:8080
+----
+
+That should show an output:
+
+++++
+<html><body><h1>It works!</h1></body></html>
+++++
+
+[TIP]
+====
+ - As a convinience you can add port forwards to Vagrantfile, allowing you to access the services from using `localhost`
+ - Alias docker to podman `alias docker=podman`
+====
+
+Now you are all set to build and run containers with podman on macOS!
+
+== Cleanup
+
+[source,bash]
+----
+vagrant destory
+----
+
+== References
+
+- https://podman.io/getting-started/
+- https://www.redhat.com/sysadmin/podman-clients-macos-windows
+- https://www.redhat.com/sysadmin/podmans-new-rest-api
+
+== LICENSING
+
+link:./LICENSE[GPLv3 or later]

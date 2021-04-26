@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "podman-machine"
+version = "0.1.0"
+description = "The Podman Vagrant machine and Remote Client"
+authors = ["Kamesh Sampath <kamesh.sampath@hotmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+ansible = "^3.3.0"
+
+[tool.poetry.dev-dependencies]
+jmespath = "^0.10.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
