@@ -44,7 +44,7 @@ brew install podman
 ==== On Windows
 https://github.com/containers/podman/releases/latest/download/podman-remote-release-windows.zip[Download]
 
-[NOTE]: For Windows users its highly recommended to use WSL
+NOTE: For Windows users its highly recommended to use WSL
 
 === Ansible Setup on macOS
 
@@ -86,6 +86,8 @@ vagrant plugin install vagrant-vbguest
 ====
 
 NOTE: Wait for few minutes for the installation to be done.
+
+Once the vagrant up completes successfully, try checking if you are able to reach to podman socket,
 
 == Verify Setup
 
@@ -144,6 +146,27 @@ Now you are all set to build and run containers with podman on macOS!
 [source,bash]
 ----
 vagrant destory
+----
+
+== Troubleshooting
+
+Sometimes if you get error like:
+
+[source,text]
+----
+Error: cannot connect to the Podman socket, please verify that Podman REST API service is running: Get "http://d/v3.1.2/libpod/_ping": ssh: rejected: connect failed (open failed)
+----
+
+This is usually due to the fact that the podman REST API is down, in such cases
+try doing the following,
+
+[source,bash]
+----
+vagrant ssh
+# check the status of podman-rest-api service
+systemctl --user status podman-rest-api 
+# if its down or having some errors try restarting
+systemctl --user restart podman-rest-api 
 ----
 
 == References

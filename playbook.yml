@@ -77,17 +77,21 @@
           - enable-linger
           - $USER
 
-    - name: "Start podman REST API"
-      ansible.builtin.command:
-        argv:
-          - podman 
-          - system
-          - service
-          - -t
-          - 0
-      async: 1000
-      poll: 0
-      register: rest_api_log
+    - name: "Copy Podman REST API Systemd unit"
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/etc/podman-rest-api.service"
+        dest: "{{ ansible_env.HOME }}/.config/systemd/user"
+        owner: "{{ ansible_user | default('vagrant') }}"
+        group: "{{ ansible_user | default('vagrant') }}"
+        mode: '0644'
+
+    - name: "Enable and start podman-rest-api service"
+      ansible.builtin.systemd:
+        state: started
+        enabled: true
+        daemon_reload: true
+        scope: user
+        name: podman-rest-api
     
     - name: "Generate podman client cert"
       local_action:
