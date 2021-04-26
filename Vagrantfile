@@ -12,13 +12,14 @@ Vagrant.configure("2") do |config|
     config.vm.network "private_network", ip: "192.168.33.10"
     
     # some common port forwards
-    # config.vm.network "forwarded_port", guest: 8080, host: 8080
-    # config.vm.network "forwarded_port", guest: 3306, host: 3306
-    # config.vm.network "forwarded_port", guest: 5432, host: 5432
+    config.vm.network "forwarded_port", guest: 8080, host: 8080
+    config.vm.network "forwarded_port", guest: 3306, host: 3306
+    config.vm.network "forwarded_port", guest: 5432, host: 5432
 
     config.vm.provider :virtualbox do |vb|
        vb.name = "podman-machine"
-       vb.memory = "4096"
+       vb.cpus = 4
+       vb.memory = 12288
     end
 
     config.vm.provision "ansible" do |ansible|
