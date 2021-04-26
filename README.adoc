@@ -145,7 +145,7 @@ Now you are all set to build and run containers with podman on macOS!
 
 [source,bash]
 ----
-vagrant destory
+vagrant destroy
 ----
 
 == Troubleshooting
